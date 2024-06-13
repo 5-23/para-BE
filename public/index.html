@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulletin Board Main Page</title>
+    <style>
+        @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Pretendard';
+            color: #0F1746;
+        }
+        body {
+            background-color: #E8EBF4;
+        }
+        .primary-click {
+            color: #0062ff;
+            transition: background-color 0.2s, transform 0.2s;
+            cursor: pointer;
+            border-radius: 4px;
+            &:hover {
+                background-color: #0062ff5b;
+            }
+            &:active {
+                transform: scale(0.98);
+            }
+        }
+        dialog {
+            opacity: 0;
+            transition: all .5s;
+            transform: translateX(-40%) translateY(-50%);
+            top: 50%;
+            left: 50%;
+            border-radius: 8px;
+            border: 0;
+
+            > form {
+                display: flex;
+                gap: 8px;
+            }
+            
+            > form > input[type="text"] {
+                margin-bottom: 8px;
+                font-size: 16px;
+            }
+
+            > form > button {
+                margin-top: 16px;
+                font-size: 16px;
+                padding: 8px;
+                border-radius: 4px;
+                background-color: #0062ff27;
+                font-weight: bold;
+                border: 0;
+                cursor: pointer;
+            }
+            transition-behavior: allow-discrete;
+        }
+        dialog::backdrop {
+            transition: all .5s;
+        }
+
+        dialog[open] {
+            @starting-style {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-60%);
+            }
+            opacity: 1;
+            transform: translateX(-50%) translateY(-50%);
+
+        }
+        header, footer {
+            padding: 20px;
+            text-align: center;
+        }
+        hr {
+            margin: 16px 0;
+            border: #0062ff5b solid 1px;
+        }
+        article {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 4px;
+            > section {
+                display: flex;
+                align-items: end;
+                gap: 8px;
+                > p {
+                    color: #0062ff5b;
+                }         
+                > img {
+                    border-radius: 8px;
+                    background-color: #0062ff27;
+                    padding: 10px;
+                }   
+            }
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 800px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 4px;
+            
+            > input {
+                background-color: #E8EBF4;
+                font-size: 24px;
+                height: 35px;
+                width: 100%;
+                padding: 8px;
+                border-radius: 4px 4px 0 0;
+                outline: 0;
+                border: 0;
+                &[type="submit"] {
+                    height: fit-content;
+                    width: fit-content;
+                    font-size: 16px;
+                    background-color: #0062ff27;
+                    color: #0062ff;
+                    font-weight: bold;
+                    cursor: pointer;
+                }
+            }
+            > textarea {
+                font-size: 16px;
+                height: 35px;
+                width: 100% !important;
+                resize: none;
+                overflow: hidden;
+                padding: 8px;
+
+                margin-bottom: 8px;
+                background-color: #E8EBF4;
+                border-radius: 0 0 4px 4px;
+                outline: 0;
+                border: 0;
+            }
+        }
+        header {
+            > nav {
+                margin: auto;
+                display: flex;
+                justify-content: end;
+                gap: 16px;
+                width: 100%;
+                max-width: 800px;
+                > div {
+                    cursor: pointer;
+                    padding: 8px;
+                    border-radius: 4px;
+                    background-color: #d7e0f0;
+                    font-weight: 700;
+                }
+            }
+        }
+        main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+
+            width: 100%;
+            max-width: 800px;
+            margin:auto;    
+        }
+    </style>
+</head>
+<body>
+    <dialog id="signup">
+        <form method="dialog">
+            <label for="name">아이디</label>
+            <input type="text" name="id" id="id" required>
+        
+            <label for="passwd">비밀번호</label>
+            <input type="password" name="passwd" id="passwd" required>
+        
+            <label for="passwd-re">비밀번호 다시입력</label>
+            <input type="password" name="passwd-re" id="passwd-re" required>
+            <button type="submit" class="primary-click">회원가입</button>
+        </form>
+    </dialog>
+    
+    <dialog id="signin">
+        <form method="dialog">
+            <label for="name">아이디</label>
+            <input type="text" name="id" id="id" required>
+            
+            <label for="passwd">비밀번호</label>
+            <input type="password" name="passwd" id="passwd" required>
+            <button type="submit" class="primary-click">로그인</button>
+        </form>
+    </dialog>
+
+    <header>
+        <nav>
+            <div onclick="signup.showModal()">회원가입</div>
+            <div onclick="signin.showModal()">로그인</div>
+        </nav>
+    </header>
+
+    <main>
+        <form method="post" id="post">
+            <input type="text" required placeholder="입력...">
+            <textarea required></textarea>
+            <input type="submit" class="primary-click" value="포스트">
+        </form>
+
+        <article>
+            <section>
+                <h2>Post Title 1</h2>
+                <p>@asta</p>
+            </section>
+            <hr/>
+            <p>This is a summary of the first post. It's an engaging and informative piece that invites readers to learn more.</p>
+            <div style="margin: 25px;"></div>
+            <section>
+                <img src="/public/delete.svg" class="primary-click" alt="">
+            </section>
+        </article>
+
+    </main>
+
+    <footer>
+        © 2023 Bulletin Board. All rights reserved.
+    </footer>
+</body>
+</html>
+
+
+<script>
+    console.log(sessionStorage.getItem('id'))
+    const signup = document.querySelector('#signup');
+    const signin = document.querySelector('#signin');
+    const textarea = document.querySelector('textarea');
+    const hiddenTextarea = document.querySelector('div#hidden');
+    const postForm = document.querySelector('form#post');
+
+    textarea.addEventListener('input', (e) => {
+        if (e.inputType) {
+            textarea.style.height = '35px';   
+        }
+        height = textarea.scrollHeight;
+        if (height != 0) {
+            textarea.style.height = `${height}px`;
+        }
+    });
+
+    postForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const title = form.querySelector('input[type="text"]').value;
+        const content = form.querySelector('textarea').value;
+        console.log(title, content);
+    });
+
+    document.querySelectorAll('dialog').forEach(dialog => {
+        dialog.addEventListener('click', (event) => {
+            if (event.target.nodeName === 'DIALOG') {
+              dialog.close();
+            }
+        });
+    });
+    document.querySelector('#signup > form > button').addEventListener('click', (e) => {
+        e.preventDefault();
+        const id = document.querySelector('#signup > form > input[name="id"]').value;
+        const passwd = document.querySelector('#signup > form > input[name="passwd"]').value;
+        const passwdRe = document.querySelector('#signup > form > input[name="passwd-re"]').value;
+        if (passwd !== passwdRe) {
+            alert('비밀번호가 일치하지 않습니다.');
+            return;
+        }
+        signup.close();
+        fetch("/signup", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                id: id,
+                passwd: passwd,
+                passwdRe: passwdRe
+            }
+        }).then(res => {
+            if (res.status === 200) {
+                alert('회원가입 성공');
+                e.target.closest('form').reset();
+            } else {
+                alert('회원가입 실패');
+            }
+        });
+
+        // reset form
+    });
+    document.querySelector("#signin > form > button").addEventListener('click', (e) => {
+        e.preventDefault();
+        const id = document.querySelector('#signin > form > input[name="id"]').value;
+        const passwd = document.querySelector('#signin > form > input[name="passwd"]').value;
+        signin.close();
+        fetch("/signin", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                id: id,
+                passwd: passwd
+            }
+        }).then(res => {
+            if (res.status === 200) {
+                alert('로그인 성공');
+                sessionStorage.setItem('id', id);
+                sessionStorage.setItem('pw', pw);
+                e.target.closest('form').reset();
+            } else {
+                alert('로그인 실패');
+            }
+        });
+    });
+</script>
