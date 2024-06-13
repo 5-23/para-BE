@@ -58,18 +58,25 @@
                 cursor: pointer;
             }
             transition-behavior: allow-discrete;
-        }
-        dialog::backdrop {
-            transition: all .5s;
+            &::backdrop {
+                opacity: 0;
+                transition: all .5s allow-discrete;
+            }  
         }
 
         dialog[open] {
             @starting-style {
                 opacity: 0;
                 transform: translateX(-50%) translateY(-60%);
+                &::backdrop {
+                    opacity: 0;
+                }
             }
             opacity: 1;
             transform: translateX(-50%) translateY(-50%);
+            &::backdrop {
+                opacity: 1;
+            }
 
         }
         header, footer {
@@ -236,13 +243,13 @@
 
 
 <script>
-    console.log(sessionStorage.getItem('id'))
     const signup = document.querySelector('#signup');
     const signin = document.querySelector('#signin');
     const textarea = document.querySelector('textarea');
     const hiddenTextarea = document.querySelector('div#hidden');
     const postForm = document.querySelector('form#post');
-
+    
+    checkUser();
     textarea.addEventListener('input', (e) => {
         if (e.inputType) {
             textarea.style.height = '35px';   
@@ -282,19 +289,16 @@
             headers: {
                 'Content-Type': 'application/json',
                 id: id,
-                passwd: passwd,
-                passwdRe: passwdRe
+                passwd: passwd
             }
         }).then(res => {
             if (res.status === 200) {
                 alert('회원가입 성공');
                 e.target.closest('form').reset();
             } else {
-                alert('회원가입 실패');
+                alert('회원가입 실패', res.message);
             }
         });
-
-        // reset form
     });
     document.querySelector("#signin > form > button").addEventListener('click', (e) => {
         e.preventDefault();
@@ -315,8 +319,37 @@
                 sessionStorage.setItem('pw', pw);
                 e.target.closest('form').reset();
             } else {
-                alert('로그인 실패');
+                alert('로그인 실패', res.message);
             }
         });
     });
+
+    function checkUser() {
+        if (!sessionStorage.getItem('id') || !sessionStorage.getItem('pw')) {
+            return;
+        }
+        let a = fetch("/check", {
+            method: "GET",
+            headers: {
+                'Content-Type': 'application/json',
+                id: sessionStorage.getItem('id'),
+                passwd: sessionStorage.getItem('pw')
+            }
+        }).then(res => {
+            if (res.status != 200) {
+                alert('정보가 잘못되었습니다.');
+                sessionStorage.removeItem('id');
+                sessionStorage.removeItem('pw');
+                return;
+            }
+
+            document.header.innerHTML = `
+                <h1>${sessionStorage.getItem('id')}</h1>    
+                <nav>
+                    <div onclick="logout()">로그아웃</div>
+                </nav>
+            `;
+        });
+    }
+
 </script>

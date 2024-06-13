@@ -14,4 +14,100 @@ app.mount("/public", StaticFiles(directory="public"), name="public")
 def read_root():
     return FileResponse("./public/index.html")  
 
-# @app.
+"""
+/signup
+method: POST
+header: {
+    id: str,
+    pw: str
+}
+
+response: {
+    status: int,
+    message: str
+}
+"""
+
+"""
+/signin
+method: GET
+header: {
+    id: str,
+    pw: str
+}
+
+response: {
+    status: int,
+    message: str
+}
+"""
+
+
+"""
+/check
+method: GET
+header: {
+    id: str,
+    pw: str
+}
+
+response: {
+    status: int,
+    message: str
+}
+"""
+
+"""
+/post
+method: POST
+header: {
+    id: str,
+    pw: str,
+    title: str,
+    content: str
+}
+
+response: {
+    status: int,
+    message: str
+}
+"""
+
+
+"""
+/post
+method: GET
+header: {
+    page: int = 0
+}
+
+response: {
+    status: int,
+    posts: [
+        {
+            title: str,
+            content: str,
+            writer: str,
+            id: str
+        }, ...
+    ],
+    message: str,
+    next: int
+}
+"""
+
+
+"""
+/post
+method: DELETE
+header: {
+    id: str,
+    pw: str,
+    post_id: str
+}
+
+response: {
+    status: int,
+    message: str
+}
+"""
