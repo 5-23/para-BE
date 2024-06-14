@@ -261,9 +261,33 @@
 
     postForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const title = form.querySelector('input[type="text"]').value;
-        const content = form.querySelector('textarea').value;
-        console.log(title, content);
+        if (!sessionStorage.getItem('id')) {
+            alert('로그인이 필요합니다.');
+            return;
+        }
+        const title = postForm.querySelector('input[type="text"]').value;
+        const content = postForm.querySelector('textarea').value;
+
+        fetch("/post", {
+            method: "POST",
+            headers: {
+                id: sessionStorage.getItem('id'),
+                pw: sessionStorage.getItem('pw'),
+                title: title,
+                content: content
+            }
+        }).then(res => {
+            checkUser();
+            if (res.status != 200) {
+                alert('포스트 실패');
+                return;
+            }
+            // const article = document.createElement('article');
+            // document.querySelector('main').insertBefore(article, document.querySelector('main > div'));
+            e.target.reset();
+            location.reload();
+        });
+
     });
 
     document.querySelectorAll('dialog').forEach(dialog => {
