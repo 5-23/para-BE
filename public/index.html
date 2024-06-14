@@ -100,6 +100,9 @@
                 gap: 8px;
                 > p {
                     color: #0062ff5b;
+                    &::before {
+                        content: '@';
+                    }
                 }         
                 > img {
                     border-radius: 8px;
@@ -172,11 +175,18 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
 
+            margin-bottom: 20px;
             width: 100%;
             max-width: 800px;
             margin:auto;    
+        
+            > div {
+                cursor: pointer;
+                padding: 8px 16px;
+                border-radius: 4px;
+                background-color: #0062ff27;
+            }
         }
     </style>
 </head>
@@ -219,20 +229,7 @@
             <textarea required></textarea>
             <input type="submit" class="primary-click" value="포스트">
         </form>
-
-        <article>
-            <section>
-                <h2>Post Title 1</h2>
-                <p>@asta</p>
-            </section>
-            <hr/>
-            <p>This is a summary of the first post. It's an engaging and informative piece that invites readers to learn more.</p>
-            <div style="margin: 25px;"></div>
-            <section>
-                <img src="/public/delete.svg" class="primary-click" alt="">
-            </section>
-        </article>
-
+        <div class="primary-click" id="load-more">더보기...</div>
     </main>
 
     <footer>
@@ -248,7 +245,9 @@
     const textarea = document.querySelector('textarea');
     const hiddenTextarea = document.querySelector('div#hidden');
     const postForm = document.querySelector('form#post');
-    
+    const loadMoreButton = document.querySelector('#load-more');
+    let page = 0;
+
     checkUser();
     textarea.addEventListener('input', (e) => {
         if (e.inputType) {
@@ -287,7 +286,6 @@
         fetch("/signup", {
             method: "POST",
             headers: {
-                'Content-Type': 'application/json',
                 id: id,
                 passwd: passwd
             }
@@ -308,7 +306,6 @@
         fetch("/signin", {
             method: "POST",
             headers: {
-                'Content-Type': 'application/json',
                 id: id,
                 passwd: passwd
             }
@@ -323,15 +320,17 @@
             }
         });
     });
+    loadMoreButton.addEventListener('click', loadMore);
 
     function checkUser() {
-        if (!sessionStorage.getItem('id') || !sessionStorage.getItem('pw')) {
+        if (!sessionStorage.getItem('id') && !sessionStorage.getItem('pw')) {
+            // sessionStorage.setItem('id', "asta");
             return;
         }
-        let a = fetch("/check", {
+        
+        fetch("/check", {
             method: "GET",
             headers: {
-                'Content-Type': 'application/json',
                 id: sessionStorage.getItem('id'),
                 passwd: sessionStorage.getItem('pw')
             }
@@ -349,6 +348,68 @@
                     <div onclick="logout()">로그아웃</div>
                 </nav>
             `;
+        });
+    }
+    function deletePost(postID) {
+        fetch("/post", {
+            method: "DELETE",
+            headers: {
+                id: sessionStorage.getItem('id'),
+                pw: sessionStorage.getItem('id'),
+                post_id: postID
+            }
+        }).then(res => {
+            if (res.status != 200) {
+                alert('삭제 실패');
+                return;
+            }
+            document.querySelector(`article#${postID}`).remove();
+        });
+    }
+
+    loadMore()
+    function loadMore() {
+        fetch("/post", {
+            method: "GET",
+            headers: {
+                page: page++
+            },
+
+        }).then(res => {
+            if (res.status != 200) {
+                loadMoreButton.style.display = 'none';
+                return
+            }
+            res.json().then(data => {
+                console.log(data.posts)
+                data.posts.forEach(post => {
+                    const article = document.createElement('article');
+                    article.id = post.id;
+                    article.innerHTML = `
+                        <section>
+                            <h2>${post.title}</h2>
+                            <p>${post.author}</p>
+                        </section>
+
+                        <hr/>
+                        <p>${post.content}</p>
+                        ${
+                            post.author == sessionStorage.getItem('id') ?
+                            `
+                            <div style="margin: 25px;"></div>
+                            <section>
+                                <img src="/public/delete.svg" class="primary-click" id="delete" onclick="deletePost('${post.id}')" alt="">
+                            </section>`: ""
+                        }
+                        
+                    `;
+                    document.querySelector('main').insertBefore(article, document.querySelector('main > div'));
+                });
+
+                if (data.next == null) {
+                    loadMoreButton.style.display = 'none';
+                }
+            });
         });
     }
 
