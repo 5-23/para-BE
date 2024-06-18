@@ -1,1 +1,0 @@
-MONGODB_URI = "mongodb://ny64:ny64IsProFr@hs.5-23.dev:3000"
