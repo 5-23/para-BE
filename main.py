@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from typing import Annotated
+from .env import MONGODB_URI
 load_dotenv()
 
 import os
@@ -10,7 +11,7 @@ import json
 from pymongo import MongoClient
 from bson.json_util import dumps
 
-client = MongoClient("mongodb://ny64:ny64IsProFr@hs.5-23.dev:3000")
+client = MongoClient(MONGODB_URI)
 db = client["ny64"]
 print("Database connected!")
 
