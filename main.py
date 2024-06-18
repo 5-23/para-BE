@@ -1,9 +1,18 @@
-from fastapi import FastAPI, Header
+from fastapi import FastAPI, Header, HTTPException
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from typing import Annotated
 load_dotenv()
+
+import os
+import json
+from pymongo import MongoClient
+from bson.json_util import dumps
+
+client = MongoClient("mongodb://ny64:ny64IsProFr@hs.5-23.dev:3000")
+db = client["ny64"]
+print("Database connected!")
 
 app = FastAPI()
 
@@ -112,6 +121,21 @@ response: {
     message: str
 }
 """
+@app.post("/signup")
+def signup(id: str = Header(None), passwd: str = Header(None)):
+    # id, pw가 None인 경우 400 에러 반환
+    if id is None or passwd is None:
+        raise HTTPException(status_code=400, detail="id or pw is None")
+    
+    # 입력한 id가 이미 db에 있다면 400 에러 반환
+    if db['users'].find_one({"id": id}):
+        raise HTTPException(status_code=400, detail="id already exists")
+        
+    # db에 사용자 추가
+    db['users'].insert_one({"id": id, "pw": passwd})
+    
+    return {'status': 200, 'message': 'success'}
+    
 
 """
 /signin
@@ -126,6 +150,27 @@ response: {
     message: str
 }
 """
+
+
+
+
+@app.post("/signin")
+def signin(id: str = Header(None), passwd: str = Header(None)):
+    if id is None or passwd is None:
+        raise HTTPException(status_code=400, detail="id or pw is None")
+
+    if db['users'].find_one({"id": id, "pw": passwd}):
+        return {'status': 200, 'message': 'success'}
+    else:
+        raise HTTPException(status_code=400, detail="id or pw is wrong")
+
+
+
+
+
+
+
+
 
 
 """
