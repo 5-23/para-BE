@@ -374,19 +374,21 @@
         });
     }
     function deletePost(postID) {
+        console.log("postid", postID)
         fetch("/post", {
             method: "DELETE",
             headers: {
                 id: sessionStorage.getItem('id'),
-                passwd: sessionStorage.getItem('id'),
-                post_id: postID
+                passwd: sessionStorage.getItem('pw'),
+                postid: postID
             }
         }).then(res => {
+            console.log(res.status)
             if (res.status != 200) {
                 alert('삭제 실패');
                 return;
             }
-            document.querySelector(`article#${postID}`).remove();
+            document.getElementById(postID).remove()
         });
     }
     function logout() {

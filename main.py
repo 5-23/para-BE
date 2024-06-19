@@ -110,7 +110,7 @@ def get_post(
         }
 
 """
-/signup
+/signin
 method: POST
 header: {
     id: str,
@@ -187,6 +187,15 @@ response: {
     message: str
 }
 """
+@app.get("/check")
+def signin(id: str = Header(None), passwd: str = Header(None)):
+    print(id, passwd)
+    print("aaa", db['users'].find_one({"id": id, "pw": passwd}))
+    if db['users'].find_one({"id": id, "pw": passwd}):
+        return {'status': 200, 'message': 'success'}
+    else:
+        raise HTTPException(status_code=400, detail="id or pw is wrong")
+
 
 """
 /post
@@ -234,7 +243,7 @@ method: DELETE
 header: {
     id: str,
     passwd: str,
-    post_id: str
+    postid: str
 }
 
 response: {
