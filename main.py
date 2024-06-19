@@ -3,8 +3,8 @@ from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from dotenv import load_dotenv
 from typing import Annotated
-from .env import MONGODB_URI
-load_dotenv()
+from env import MONGODB_URI
+# load_dotenv()
 
 import os
 import json
@@ -114,7 +114,7 @@ def get_post(
 method: POST
 header: {
     id: str,
-    pw: str
+    passwd: str
 }
 
 response: {
@@ -143,7 +143,7 @@ def signup(id: str = Header(None), passwd: str = Header(None)):
 method: GET
 header: {
     id: str,
-    pw: str
+    passwd: str
 }
 
 response: {
@@ -179,7 +179,7 @@ def signin(id: str = Header(None), passwd: str = Header(None)):
 method: GET
 header: {
     id: str,
-    pw: str
+    passwd: str
 }
 
 response: {
@@ -193,7 +193,7 @@ response: {
 method: POST
 header: {
     id: str,
-    pw: str,
+    passwd: str,
     title: str,
     content: str
 }
@@ -233,7 +233,7 @@ response: {
 method: DELETE
 header: {
     id: str,
-    pw: str,
+    passwd: str,
     post_id: str
 }
 

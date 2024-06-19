@@ -272,7 +272,7 @@
             method: "POST",
             headers: {
                 id: sessionStorage.getItem('id'),
-                pw: sessionStorage.getItem('pw'),
+                passwd: sessionStorage.getItem('pw'),
                 title: title,
                 content: content
             }
@@ -337,7 +337,7 @@
             if (res.status === 200) {
                 alert('로그인 성공');
                 sessionStorage.setItem('id', id);
-                sessionStorage.setItem('pw', pw);
+                sessionStorage.setItem('pw', passwd);
                 e.target.closest('form').reset();
             } else {
                 alert('로그인 실패', res.message);
@@ -347,8 +347,7 @@
     loadMoreButton.addEventListener('click', loadMore);
 
     function checkUser() {
-        if (!sessionStorage.getItem('id') && !sessionStorage.getItem('pw')) {
-            // sessionStorage.setItem('id', "asta");
+        if (sessionStorage.getItem('id') == null && sessionStorage.getItem('pw') == null) {
             return;
         }
         
@@ -366,7 +365,7 @@
                 return;
             }
 
-            document.header.innerHTML = `
+            document.querySelector("header").innerHTML = `
                 <h1>${sessionStorage.getItem('id')}</h1>    
                 <nav>
                     <div onclick="logout()">로그아웃</div>
@@ -379,7 +378,7 @@
             method: "DELETE",
             headers: {
                 id: sessionStorage.getItem('id'),
-                pw: sessionStorage.getItem('id'),
+                passwd: sessionStorage.getItem('id'),
                 post_id: postID
             }
         }).then(res => {
@@ -389,6 +388,11 @@
             }
             document.querySelector(`article#${postID}`).remove();
         });
+    }
+    function logout() {
+        sessionStorage.removeItem('id');
+        sessionStorage.removeItem('pw');
+        location.reload();
     }
 
     loadMore()
