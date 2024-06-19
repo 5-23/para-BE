@@ -8,9 +8,9 @@ from env import MONGODB_URI
 
 import os
 import json
-from pymongo import MongoClient
+from pymongo import MongoClient, DESCENDING
 from bson.json_util import dumps
-
+from bson import ObjectId
 client = MongoClient(MONGODB_URI)
 db = client["ny64"]
 print("Database connected!")
@@ -25,92 +25,8 @@ app.mount("/public", StaticFiles(directory="public"), name="public")
 def read_root():
     return FileResponse("./public/index.html")  
 
-@app.get("/post")
-def get_post(
-    page: Annotated[int, Header()] = 0
-):
-    posts = [
-        {
-            "author": "astara",
-            "title": "nou1",
-            "content": "str",
-            "id": "1"
-        },
-        {
-            "author": "asta",
-            "title": "nou2",
-            "content": "str",
-            "id": "2"
-        },
-        {
-            "author": "asta",
-            "title": "nou3",
-            "content": "str",
-            "id": "3"
-        },
-        {
-            "author": "asta",
-            "title": "nou4",
-            "content": "str",
-            "id": "4"
-        },
-        {
-            "author": "asta",
-            "title": "nou5",
-            "content": "str",
-            "id": "5"
-        },
-
-        {
-            "author": "asta",
-            "title": "nou6",
-            "content": "str",
-            "id": "6"
-        },
-
-        {
-            "author": "asta",
-            "title": "nou7",
-            "content": "str",
-            "id": "7"
-        },
-
-        {
-            "author": "asta",
-            "title": "nou8",
-            "content": "str",
-            "id": "8"
-        },
-    ]
-    if page*5+1 > posts.__len__():
-        return {
-            "status": 400,
-            "message": "no more posts"
-        }
-    try:
-        if (page+1)*5+1 > posts.__len__():
-            return {
-                "status": 200,
-                "posts": posts[page*5:page*5+5],
-                "message": "success",
-                "next": None
-            }
-        return {
-            "status": 200,
-            "posts": posts[page*5:page*5+5],
-            "message": "success",
-            "next": page+1
-        }
-    except:
-        return {
-            "status": 200,
-            "posts": posts[page*5:],
-            "message": "success",
-            "next": None
-        }
-
 """
-/signin
+/signup
 method: POST
 header: {
     id: str,
@@ -140,7 +56,7 @@ def signup(id: str = Header(None), passwd: str = Header(None)):
 
 """
 /signin
-method: GET
+method: POST
 header: {
     id: str,
     passwd: str
@@ -151,10 +67,6 @@ response: {
     message: str
 }
 """
-
-
-
-
 @app.post("/signin")
 def signin(id: str = Header(None), passwd: str = Header(None)):
     if id is None or passwd is None:
@@ -164,15 +76,6 @@ def signin(id: str = Header(None), passwd: str = Header(None)):
         return {'status': 200, 'message': 'success'}
     else:
         raise HTTPException(status_code=400, detail="id or pw is wrong")
-
-
-
-
-
-
-
-
-
 
 """
 /check
@@ -188,14 +91,11 @@ response: {
 }
 """
 @app.get("/check")
-def signin(id: str = Header(None), passwd: str = Header(None)):
-    print(id, passwd)
-    print("aaa", db['users'].find_one({"id": id, "pw": passwd}))
+def check(id: str = Header(None), passwd: str = Header(None)):
     if db['users'].find_one({"id": id, "pw": passwd}):
         return {'status': 200, 'message': 'success'}
     else:
         raise HTTPException(status_code=400, detail="id or pw is wrong")
-
 
 """
 /post
@@ -212,7 +112,16 @@ response: {
     message: str
 }
 """
-
+@app.post("/post")
+def create_post(id: str = Header(None), passwd: str = Header(None), title: str = Header(None), content: str = Header(None)):
+    if id is None or passwd is None or title is None or content is None:
+        raise HTTPException(status_code=400, detail="id, passwd, title or content is None")
+    
+    if not db['users'].find_one({"id": id, "pw": passwd}):
+        raise HTTPException(status_code=400, detail="id or pw is wrong")
+    
+    db['posts'].insert_one({"author": id, "title": title, "content": content})
+    return {'status': 200, 'message': 'Post created successfully'}
 
 """
 /post
@@ -235,7 +144,19 @@ response: {
     next: int
 }
 """
-
+@app.get("/post")
+def get_posts(page: int = Header(0)):
+    posts_per_page = 5
+    skip = page * posts_per_page
+    cursor = db['posts'].find().sort("_id", DESCENDING).skip(skip).limit(posts_per_page)
+    posts = [{"author": post["author"], "title": post["title"], "content": post["content"], "id": str(post["_id"])} for post in cursor]
+    
+    try:
+        if (page+1)*5+1 > db['posts'].count_documents({}):
+            return {'status': 200, 'posts': posts, 'message': 'success', 'next': None}
+        return {'status': 200, 'posts': posts, 'message': 'success', 'next': page+1}
+    except:
+        return {'status': 200, 'posts': posts, 'message': 'success', 'next': None}
 
 """
 /post
@@ -251,3 +172,16 @@ response: {
     message: str
 }
 """
+@app.delete("/post")
+def delete_post(id: str = Header(None), passwd: str = Header(None), postid: str = Header(None)):
+    print(id, passwd, postid)
+    # if id is None or passwd is None or postid is None:
+    #     raise HTTPException(status_code=400, detail="id, passwd or post_id is None")
+    if not db['users'].find_one({"id": id, "pw": passwd}):
+        raise HTTPException(status_code=400, detail="id or pw is wrong")
+    
+    result = db['posts'].delete_one({"_id": ObjectId(postid), "author": id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Post not found or you are not the author")
+    
+    return {'status': 200, 'message': 'Post deleted successfully'}
